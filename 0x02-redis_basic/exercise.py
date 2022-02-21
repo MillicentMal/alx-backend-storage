@@ -13,7 +13,7 @@ def count_calls(method : Callable ) -> Callable:
     @wraps(method)
     def wrapper(self, args, **kwds):
         self._redis.incr(key)
-        # return method(self, *args, **kwds)
+        return method(self, *args)
     return wrapper
 
 def call_history(method : Callable) -> Callable:
@@ -24,7 +24,7 @@ def call_history(method : Callable) -> Callable:
     def wrapper(self, *args, **kwds):
         """Storing inputs and outputs into lists"""
         self._redis.rpush(inputKey, str(args))
-        output_data = method(self, *args, **kwds)
+        output_data = method(self, *args)
         self._redis.rpush(output, str(output_data))
         return output_data
     return wrapper
