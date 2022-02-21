@@ -4,7 +4,7 @@ Creating a Cache class in Redis
 """
 import redis
 from uuid import uuid4
-
+from typing import Union
 
 class Cache:
     """
