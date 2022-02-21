@@ -14,7 +14,8 @@ def count_calls(method: Callable) -> Callable:
     def wrapper(self, *args, **kwds):
         """wrapped function that increments the key"""
         self._redis.incr(key)
-        return method(self, *args, **kwds)
+        data = method(self, *args, **kwds)
+        return data
     return wrapper
 
 
@@ -22,9 +23,9 @@ def call_history(method: Callable) -> Callable:
     """Calls a method that stores the history of inputs and outputs
        for a particular function.
     """
-    qualified_name = method.__qualname__
-    input_key = qualified_name + ":inputs"
-    output_key = qualified_name + ":outputs"
+    method_name = method.__qualname__
+    input_key = method_name + ":inputs"
+    output_key = method_name + ":outputs"
 
     @wraps(method)
     def wrapper(self, *args, **kwds):
