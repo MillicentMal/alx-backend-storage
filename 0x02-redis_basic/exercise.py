@@ -26,6 +26,19 @@ class Cache:
         else:
             return self._redis.get(key)
 
+    def get_str(self, key: str) -> str:
+        """
+        Converting something to a string
+        """
+        return self._redis.get(key).decode("utf-8")
+
+    def get_int(self, key: str) -> int:
+        """Parametizes to int"""
+        try:
+            data = int(value.decode("utf-8"))
+        except Exception:
+            data = 0
+        return data
 
 
 
