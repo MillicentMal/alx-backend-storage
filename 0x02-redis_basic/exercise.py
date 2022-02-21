@@ -8,28 +8,22 @@ from typing import Union, Callable
 from functools import wraps
 
 
-def count_calls(method : Callable ) -> Callable:
-    key = method.__qualname__
-    
-    @wraps(method)
-    def wrapper(self, args, **kwds):
-        self._redis.incr(key)
-        return method(self, *args, **kwds)
-    return wrapper
-
-def call_history(method : Callable) -> Callable:
-    inputKey = method.__qualname__ + ":inputs"
-    output = method.__qualname__ + ":outputs"
+def call_history(method: Callable) -> Callable:
+    """Calls a method that stores the history of inputs and outputs
+       for a particular function.
+    """
+    qualified_name = method.__qualname__
+    input_key = qualified_name + ":inputs"
+    output_key = qualified_name + ":outputs"
 
     @wraps(method)
     def wrapper(self, *args, **kwds):
-        """Storing inputs and outputs into lists"""
-        self._redis.rpush(inputKey, str(args))
-        output_data = method(self, *args)
-        self._redis.rpush(output, str(output_data))
-        return output_data
+        """Stores the data in a redis db"""
+        self._redis.rpush(input_key, str(args))
+        data = method(self, *args, **kwds)
+        self._redis.rpush(output_key, str(data))
+        return data
     return wrapper
-
 
 class Cache:
     """
