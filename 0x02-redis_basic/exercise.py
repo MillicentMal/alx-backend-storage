@@ -8,11 +8,11 @@ from typing import Union, Callable
 from functools import wraps
 
 def count_calls(method: Callable) -> Callable:
-    """ counts how many times methods of the Cache class are called"""
+    """ counts calls of methods of the Cache"""
     key = method.__qualname__
     @wraps(method)
     def wrapper(self, *args, **kwds):
-        """wrapped function that increments the key"""
+        """wraps incrementation of key"""
         self._redis.incr(key)
         data = method(self, *args, **kwds)
         return data
@@ -20,21 +20,43 @@ def count_calls(method: Callable) -> Callable:
 
 
 def call_history(method: Callable) -> Callable:
-    """Calls a method that stores the history of inputs and outputs
-       for a particular function.
+    """Keeps track of input/output of method.
     """
     method_name = method.__qualname__
-    input_key = method_name + ":inputs"
-    output_key = method_name + ":outputs"
+    inputKey = method_name + ":inputs"
+    output = method_name + ":outputs"
 
     @wraps(method)
     def wrapper(self, *args, **kwds):
-        """Stores the data in a redis db"""
-        self._redis.rpush(input_key, str(args))
+        """Stores the data io data"""
+        self._redis.rpush(inputKey, str(args))
         data = method(self, *args, **kwds)
-        self._redis.rpush(output_key, str(data))
+        self._redis.rpush(output, str(data))
         return data
     return wrapper
+
+
+
+def replay(method: Callable) -> None:
+    """number of calls of func"""
+    redis = method.__self__._redis
+    method_name = method.__qualname__
+    calls = redis.get(method_name).decode("utf-8")
+    print("{} was called {} times:".format(method_name, calls))
+    inputKey = method_name + ":inputs"
+    output = method_name + ":outputs"
+    input_list = redis.lrange(inputKey, 0, -1)
+    output_list = redis.lrange(output, 0, -1)
+    io_list = list(zip(input_list, output_list))
+    for key, value in io_list:
+        key = key.decode("utf-8")
+        value = value.decode("utf-8")
+        print("{}(*{}) -> {}".format(method_name, key, value))
+
+
+
+
+
 
 class Cache:
     """
