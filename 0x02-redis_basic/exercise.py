@@ -22,8 +22,9 @@ def call_history(method : Callable) -> Callable:
     def wrapper(self, *args, **kwds):
         """Storing inputs and outputs into lists"""
         self._redis.rpush(inputKey, str(args))
-        self._redis.rpush(output, str(method(self, *args, **kwds)))
-        return data
+        output_data = method(self, *args, **kwds)
+        self._redis.rpush(output, str(output_data))
+        return output_data
     return wrapper
 
 
@@ -35,6 +36,8 @@ class Cache:
         self._redis = redis.Redis()
         self._redis.flushdb()
 
+    @count_calls
+    @call_history
     def store(self, data: Union[str, bytes, int, float]) -> str:
         ki = str(uuid4())
         self._redis.set(ki, data)
