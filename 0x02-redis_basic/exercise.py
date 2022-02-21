@@ -2,10 +2,13 @@
 """
 Creating a Cache class in Redis
 """
+
+
 import redis
 from uuid import uuid4
 from typing import Union, Callable
 from functools import wraps
+
 
 def count_calls(method: Callable) -> Callable:
     """ counts calls of methods of the Cache"""
@@ -36,7 +39,6 @@ def call_history(method: Callable) -> Callable:
     return wrapper
 
 
-
 def replay(method: Callable) -> None:
     """number of calls of func"""
     redis = method.__self__._redis
@@ -54,10 +56,6 @@ def replay(method: Callable) -> None:
         print("{}(*{}) -> {}".format(method_name, key, value))
 
 
-
-
-
-
 class Cache:
     """
     Cache cls
@@ -66,12 +64,16 @@ class Cache:
         self._redis = redis.Redis()
         self._redis.flushdb()
 
+
     @count_calls
     @call_history
     def store(self, data: Union[str, bytes, int, float]) -> str:
-        ki = str(uuid4())
-        self._redis.set(ki, data)
-        return ki 
+        """
+        adds a key, valu pair
+        """
+        key = str(uuid4())
+        self._redis.set(key, data)
+        return key
     
 
     def get(self, key: str, fn: Callable=None) -> str:
@@ -80,12 +82,14 @@ class Cache:
         else:
             return self._redis.get(key)
 
+    
     def get_str(self, key: str) -> str:
         """
         Converting something to a string
         """
         return self._redis.get(key).decode("utf-8")
 
+    
     def get_int(self, key: str) -> int:
         """Parametizes to int"""
         try:
