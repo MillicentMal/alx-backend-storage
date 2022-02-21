@@ -13,7 +13,7 @@ def count_calls(method : Callable ) -> Callable:
     @wraps(method)
     def wrapper(self, args, **kwds):
         self._redis.incr(key)
-        return method(self, *args, **kwds)
+        # return method(self, *args, **kwds)
     return wrapper
 
 def call_history(method : Callable) -> Callable:
