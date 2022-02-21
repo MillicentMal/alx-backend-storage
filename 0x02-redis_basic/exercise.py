@@ -16,7 +16,7 @@ class Cache:
 
     def store(self, data) -> str:
         ki = str(uuid4())
-        self._redis.set(str(uuid4()), str(data))
+        self._redis.set(ki, data)
         return ki 
 
 cache = Cache()
