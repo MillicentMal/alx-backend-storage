@@ -6,6 +6,27 @@ import redis
 from uuid import uuid4
 from typing import Union, Callable
 
+def count_calls(method : Callable ) -> Callable:
+    key = method.__qualname__
+    @wraps(method)
+    def wrapper(*args, **kwds):
+        self._redis.incr(key)
+        return method(self, *args, **kwds)
+    return wrapper
+
+def call_history(method : Callable) -> Callable:
+    inputKey = method.__qualname__ + ":inputs"
+    output = method.__qualname__ + ":outputs"
+
+    @wraps(method)
+    def wrapper(self, *args, **kwds):
+        """Storing inputs and outputs into lists"""
+        self._redis.rpush(inputKey, str(args))
+        self._redis.rpush(output, str(method(self, *args, **kwds)))
+        return data
+    return wrapper
+
+
 class Cache:
     """
     Cache cls
