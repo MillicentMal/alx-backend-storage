@@ -13,6 +13,7 @@ from functools import wraps
 def count_calls(method: Callable) -> Callable:
     """ counts calls of methods of the Cache"""
     key = method.__qualname__
+
     @wraps(method)
     def wrapper(self, *args, **kwds):
         """wraps incrementation of key"""
@@ -60,10 +61,10 @@ class Cache:
     """
     Cache cls
     """
+
     def __init__(self, host='localhost', port=6379):
         self._redis = redis.Redis()
         self._redis.flushdb()
-
 
     @count_calls
     @call_history
@@ -74,22 +75,20 @@ class Cache:
         key = str(uuid4())
         self._redis.set(key, data)
         return key
-    
 
-    def get(self, key: str, fn: Callable=None) -> str:
+    def get(self, key: str, fn: Callable = None) -> str:
+        """get key, vaalue pairs"""
         if fn is not None:
             return fn(self._redis.get(key))
         else:
             return self._redis.get(key)
 
-    
     def get_str(self, key: str) -> str:
         """
         Converting something to a string
         """
         return self._redis.get(key).decode("utf-8")
 
-    
     def get_int(self, key: str) -> int:
         """Parametizes to int"""
         try:
