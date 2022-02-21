@@ -10,7 +10,7 @@ class Cache:
     """
     Cache cls
     """
-    def __init__(self):
+    def __init__(self, host='localhost', port=6379):
         self._redis = redis.Redis()
         self._redis.flushdb()
 
