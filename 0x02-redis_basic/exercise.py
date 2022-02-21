@@ -5,6 +5,8 @@ Creating a Cache class in Redis
 import redis
 from uuid import uuid4
 from typing import Union, Callable
+from functools import wraps
+
 
 def count_calls(method : Callable ) -> Callable:
     key = method.__qualname__
