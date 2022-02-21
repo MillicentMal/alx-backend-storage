@@ -4,7 +4,7 @@ Creating a Cache class in Redis
 """
 import redis
 from uuid import uuid4
-from typing import Union
+from typing import Union, Callable
 
 class Cache:
     """
@@ -18,7 +18,13 @@ class Cache:
         ki = str(uuid4())
         self._redis.set(ki, data)
         return ki 
+    
 
+    def get(self, key: str, fn: Callable=None) -> str:
+        if fn is not None:
+            return fn(self._redis.get(key))
+        else:
+            return self._redis.get(key)
 
 
 
